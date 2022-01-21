@@ -11,7 +11,7 @@ import Alamofire
 
 protocol RepositoryServiceProtocol {
     
-    func fetchRepositories() -> AnyPublisher<DataResponse<RepositoriesModel, NetworkError>, Never>
+    func fetchRepositories(currentPage: Int) -> AnyPublisher<DataResponse<RepositoriesModel, NetworkError>, Never>
 }
 
 
@@ -23,9 +23,9 @@ class RepositoryService {
 
 extension RepositoryService: RepositoryServiceProtocol {
     
-    func fetchRepositories() -> AnyPublisher<DataResponse<RepositoriesModel, NetworkError>, Never> {
+    func fetchRepositories(currentPage: Int) -> AnyPublisher<DataResponse<RepositoriesModel, NetworkError>, Never> {
         
-        let url = URL(string: "https://api.github.com/search/repositories?q=language:Java&sort=stars&page=1")!
+        let url = URL(string: "https://api.github.com/search/repositories?q=language:Java&sort=stars&page=\(currentPage)")!
         
         return AF.request(url,
                           method: .get)

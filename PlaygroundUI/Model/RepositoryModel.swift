@@ -10,15 +10,21 @@ import Foundation
 struct RepositoriesModel: Codable {
     
     var repositories: [RepositoryModel]?
+    var hasMorePages: Bool?
+    var totalCount: Int?
     
-    init(repositories: [RepositoryModel]? = nil) {
+    init(repositories: [RepositoryModel]? = nil, hasMorePages: Bool? = nil, totalCount: Int? = nil) {
         
         self.repositories = repositories
+        self.hasMorePages = hasMorePages
+        self.totalCount = totalCount
     }
     
     enum CodingKeys: String, CodingKey {
         
         case repositories = "items"
+        case hasMorePages = "incomplete_results"
+        case totalCount = "total_count"
     }
 }
 

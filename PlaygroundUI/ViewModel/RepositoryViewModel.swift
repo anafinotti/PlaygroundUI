@@ -10,10 +10,14 @@ import Combine
 
 class RepositoryViewModel: ObservableObject {
     
-    @Published var repositoriesList = RepositoriesModel()
+    @Published var repositoryList = RepositoriesModel()
     @Published var repositoriesLoadingError: String = ""
     @Published var showAlert: Bool = false
+    @Published var isLoadingPage = false
 
+    private var currentPage = 1
+    private var canLoadMorePages = true
+    
     private var cancellableSet: Set<AnyCancellable> = []
     var dataManager: RepositoryServiceProtocol
     
@@ -25,10 +29,39 @@ class RepositoryViewModel: ObservableObject {
     
     func getRepositories() {
         
-        dataManager.fetchRepositories()
-            .sink { (dataResponse) in
-                if dataResponse.error != nil { self.createAlert(with: dataResponse.error!) }
-                else { self.repositoriesList = dataResponse.value ?? RepositoriesModel() }
+        self.isLoadingPage = true
+        
+        dataManager.fetchRepositories(currentPage: self.currentPage)
+            .handleEvents(receiveOutput: { response in
+                
+                self.isLoadingPage = false
+
+                if let error = response.error { self.createAlert(with: error) }
+                else if let repositories = response.value {
+                    
+                    self.canLoadMorePages = repositories.hasMorePages ?? false
+                    self.currentPage += 1
+                }
+            })
+            .sink { (response) in
+                
+                if let error = response.error { self.createAlert(with: error) }
+                else if let repositoryList = response.value {
+                    
+                    var repositories = self.repositoryList.repositories
+                    var newRepositoryList = RepositoriesModel()
+                    
+                    if repositories != nil,
+                       let newRepositories = repositoryList.repositories {
+                        
+                        repositories!.append(contentsOf: newRepositories)
+                    }
+                    
+                    newRepositoryList = repositoryList
+                    if repositories != nil { newRepositoryList.repositories = repositories }
+                    
+                    self.repositoryList = newRepositoryList
+                }
             }.store(in: &cancellableSet)
     }
     

@@ -15,7 +15,7 @@ struct RepositoriesView: View {
         
         NavigationView {
             
-            List(repositoryViewModel.repositoriesList.repositories ?? [RepositoryModel]()) { repository in
+            List(repositoryViewModel.repositoryList.repositories ?? [RepositoryModel]()) { repository in
                 
                 NavigationLink {
                     RepositoryDetailView(repository: repository)
